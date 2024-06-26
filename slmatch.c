@@ -10,38 +10,32 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <slang.h>
 
-#define BUF_SIZE 256
-
 int main(int argc, char *argv[])
 {
-    unsigned char buf[BUF_SIZE];
-    SLRegexp_Type regex;
-    unsigned char *bp;
+    SLRegexp_Type *regex;
+    char *bp;
 
     if ( argc != 3 ) {
         fprintf(stderr, "slmatch: Usage: slmatch pattern string\n");
         exit(2);
     }
 
-    regex.pat = (unsigned char *)argv[1];
-    regex.buf = buf;
-    regex.buf_len = BUF_SIZE;
-    regex.case_sensitive = 0;
+    regex = SLregexp_compile(argv[1], SLREGEXP_CASELESS|SLREGEXP_UTF8);
 
-    SLang_regexp_compile(&regex);
-
-    bp = SLang_regexp_match( (unsigned char *)argv[2], strlen(argv[2]),
-    &regex);
+    bp = SLregexp_match(regex, argv[2], strlen(argv[2]));
 
     if ( bp == NULL ) {
         printf("no match\n");
+        SLregexp_free(regex);
         exit(1);
     }
 
     printf("match: %s\n", bp);
 
+    SLregexp_free(regex);
     return 0;
 }
